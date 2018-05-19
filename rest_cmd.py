@@ -3,6 +3,7 @@ from cmd2 import with_argument_list
 from cmd2 import with_category
 from cmd2 import argparse, with_argparser
 import requests
+from time import sleep
 
 CMD_REST_CLI = 'REST CLI Commands'
 
@@ -20,6 +21,9 @@ response_subcommands = {
 for k, v in response_subcommands.items():
     v['func'] = response_subparser.add_parser(k, help=v['help'])
 
+repeatable_parser = argparse.ArgumentParser()
+repeatable_parser.add_argument('-r', metavar='N', dest='count', type=int, default=1, help='iteration times')
+repeatable_parser.add_argument('-i', dest='interval', type=float, default=0.5, help='iteration interval in sec')
 
 class RestCmd(Cmd):
     def __init__(self, url='http://localhost'):
@@ -58,43 +62,55 @@ class RestCmd(Cmd):
         self.url = self.url_root + ('/{0}'.format(self.resource) if self.resource else '')
         self.prompt = 'RESTCLI [' + self.url + '] '
 
+    @with_argparser(repeatable_parser)
     @with_category(CMD_REST_CLI)
-    def do_get(self, line):
+    def do_get(self, args):
         """Send GET request"""
-        self._record_response(requests.get(self.url, params=None))
+        self._iterate(lambda x: requests.get(x), args.count, args.interval)
 
+    @with_argparser(repeatable_parser)
     @with_category(CMD_REST_CLI)
-    def do_post(self, line):
+    def do_post(self, args):
         """Send POST request"""
-        self._record_response(requests.post(self.url, data=None, json=None))
+        self._iterate(lambda x: requests.post(x), args.count, args.interval)
 
+    @with_argparser(repeatable_parser)
     @with_category(CMD_REST_CLI)
-    def do_put(self, line):
+    def do_put(self, args):
         """Send PUT request"""
-        self._record_response(requests.put(self.url, data=None))
+        self._iterate(lambda x: requests.put(x), args.count, args.interval)
 
+    @with_argparser(repeatable_parser)
     @with_category(CMD_REST_CLI)
-    def do_patch(self, line):
+    def do_patch(self, args):
         """Send PATCH request"""
-        self._record_response(requests.patch(self.url, data=None))
+        self._iterate(lambda x: requests.patch(x), args.count, args.interval)
 
+    @with_argparser(repeatable_parser)
     @with_category(CMD_REST_CLI)
-    def do_delete(self, line):
+    def do_delete(self, args):
         """Send DELETE request"""
-        self._record_response(requests.delete(self.url))
+        self._iterate(lambda x: requests.delete(x), args.count, args.interval)
 
+    @with_argparser(repeatable_parser)
     @with_category(CMD_REST_CLI)
-    def do_head(self, line):
+    def do_head(self, args):
         """Send HEAD request"""
-        self._record_response(requests.head(self.url))
+        self._iterate(lambda x: requests.head(x), args.count, args.interval)
 
+    @with_argparser(repeatable_parser)
     @with_category(CMD_REST_CLI)
-    def do_options(self, line):
+    def do_options(self, args):
         """Send OPTION request"""
-        self._record_response(requests.options(self.url))
+        self._iterate(lambda x: requests.options(x), args.count, args.interval)
 
-    def _record_response(self, response):
-        self.response = response
+    def _iterate(self, request, count, interval):
+        for i in range(count):
+            self._record_response(request)
+            sleep(interval)
+
+    def _record_response(self, request):
+        self.response = request(self.url)
         print(self.response)
 
     @with_argparser(response_parser)
