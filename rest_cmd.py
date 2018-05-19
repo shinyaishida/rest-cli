@@ -60,7 +60,7 @@ class RestCmd(Cmd):
 
     def _set_url(self):
         self.url = self.url_root + ('/{0}'.format(self.resource) if self.resource else '')
-        self.prompt = 'RESTCLI [' + self.url + '] '
+        self.prompt = self.url_root + ' [/{0}] '.format(self.resource)
 
     @with_argparser(repeatable_parser)
     @with_category(CMD_REST_CLI)
