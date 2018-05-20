@@ -1,7 +1,6 @@
 from cmd2 import Cmd
-from cmd2 import with_argument_list
-from cmd2 import with_category
-from cmd2 import argparse, with_argparser
+from cmd2 import with_argument_list, with_category, with_argparser
+from cmd2 import argparse
 import requests
 from time import sleep
 
@@ -18,33 +17,33 @@ response_subcommands = {
     'text': {'help': 'print text'},
     'url': {'help': 'print URL'}
 }
+
 for k, v in response_subcommands.items():
     v['func'] = response_subparser.add_parser(k, help=v['help'])
-
-repeatable_parser = argparse.ArgumentParser()
-repeatable_parser.add_argument('-r', metavar='N', dest='count', type=int, default=1, help='iteration times')
-repeatable_parser.add_argument('-i', dest='interval', type=float, default=0.5, help='iteration interval in sec')
 
 class RestCmd(Cmd):
     def __init__(self, url='http://localhost'):
         Cmd.__init__(self)
         self.url_root = url
         self.resource = ''
-        self._set_url()
+        self._set_prompt()
         self.response = None
+
+    def _set_prompt(self):
+        self.prompt = self.url_root + ' [/{0}] '.format(self.resource)
 
     @with_argument_list
     @with_category(CMD_REST_CLI)
     def do_cd(self, args):
         """Change URL hierarchy level"""
         self.resource = self._change_resource(args[0]) if args else ''
-        self._set_url()
+        self._set_prompt()
 
     def _change_resource(self, resource):
         if not resource:
             return ''
-        levels = list(filter(lambda x: x, resource.split('/')))
         path = self.resource
+        levels = list(filter(lambda x: x, resource.split('/')))
         for level in levels:
             if level == '..':
                 if path:
@@ -58,60 +57,67 @@ class RestCmd(Cmd):
                 path = (path + '/' if path else path) + level
         return path
 
-    def _set_url(self):
-        self.url = self.url_root + ('/{0}'.format(self.resource) if self.resource else '')
-        self.prompt = self.url_root + ' [/{0}] '.format(self.resource)
+    repeatable_parser = argparse.ArgumentParser()
+    repeatable_parser.add_argument('-r', metavar='N', dest='count', type=int, default=1, help='iteration times')
+    repeatable_parser.add_argument('-i', dest='interval', type=float, default=0.5, help='iteration interval in sec')
+    repeatable_parser.add_argument('resource', metavar='RESOURCE', nargs='?', help='resource to send request(s)')
 
     @with_argparser(repeatable_parser)
     @with_category(CMD_REST_CLI)
     def do_get(self, args):
         """Send GET request"""
-        self._iterate(lambda x: requests.get(x), args.count, args.interval)
+        self._iterate(lambda x: requests.get(x), args)
 
     @with_argparser(repeatable_parser)
     @with_category(CMD_REST_CLI)
     def do_post(self, args):
         """Send POST request"""
-        self._iterate(lambda x: requests.post(x), args.count, args.interval)
+        self._iterate(lambda x: requests.post(x), args)
 
     @with_argparser(repeatable_parser)
     @with_category(CMD_REST_CLI)
     def do_put(self, args):
         """Send PUT request"""
-        self._iterate(lambda x: requests.put(x), args.count, args.interval)
+        self._iterate(lambda x: requests.put(x), args)
 
     @with_argparser(repeatable_parser)
     @with_category(CMD_REST_CLI)
     def do_patch(self, args):
         """Send PATCH request"""
-        self._iterate(lambda x: requests.patch(x), args.count, args.interval)
+        self._iterate(lambda x: requests.patch(x), args)
 
     @with_argparser(repeatable_parser)
     @with_category(CMD_REST_CLI)
     def do_delete(self, args):
         """Send DELETE request"""
-        self._iterate(lambda x: requests.delete(x), args.count, args.interval)
+        self._iterate(lambda x: requests.delete(x), args)
 
     @with_argparser(repeatable_parser)
     @with_category(CMD_REST_CLI)
     def do_head(self, args):
         """Send HEAD request"""
-        self._iterate(lambda x: requests.head(x), args.count, args.interval)
+        self._iterate(lambda x: requests.head(x), args)
 
     @with_argparser(repeatable_parser)
     @with_category(CMD_REST_CLI)
     def do_options(self, args):
         """Send OPTION request"""
-        self._iterate(lambda x: requests.options(x), args.count, args.interval)
+        self._iterate(lambda x: requests.options(x), args)
 
-    def _iterate(self, request, count, interval):
-        for i in range(count):
+    def _iterate(self, request, args):
+        if args.resource:
+            self.resource = self._change_resource(args.resource)
+            self._set_prompt()
+        for i in range(args.count):
             self._record_response(request)
-            sleep(interval)
+            sleep(args.interval)
 
     def _record_response(self, request):
-        self.response = request(self.url)
+        self.response = request(self._get_url())
         print(self.response)
+
+    def _get_url(self):
+        return self.url_root + ('/{0}'.format(self.resource) if self.resource else '')
 
     @with_argparser(response_parser)
     @with_category(CMD_REST_CLI)
