@@ -10,13 +10,13 @@ class RestCmd(Cmd):
 
     def __init__(self, url_root='http://localhost'):
         Cmd.__init__(self)
-        self.url_root = self._format_url_root(url_root)
+        self._format_url_root(url_root)
         self.resource = ''
         self._set_prompt()
         self.response = None
 
     def _format_url_root(self, url_root):
-        return url_root[:-1] if url_root.endswith('/') else url_root
+        self.url_root = url_root[:-1] if url_root.endswith('/') else url_root
 
     def _set_prompt(self):
         self.prompt = '\x1b[32m' + self.url_root + ' \x1b[34m[/{0}]\x1b[0m '.format(self.resource)
@@ -26,7 +26,7 @@ class RestCmd(Cmd):
     def do_switch(self, args):
         """Change URL root"""
         if args:
-            self.url_root = self._format_url_root(args[0])
+            self._format_url_root(args[0])
             self._set_prompt()
 
     @with_argument_list
