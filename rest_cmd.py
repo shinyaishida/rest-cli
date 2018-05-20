@@ -102,12 +102,13 @@ class RestCmd(Cmd):
         self._iterate(lambda x: requests.options(x), args)
 
     def _iterate(self, request, args):
+        org_resource = self.resource
         if args.resource:
             self.resource = self._switch_resource(args.resource)
-            self._set_prompt()
         for i in range(args.count):
             self._record_response(request)
             sleep(args.interval)
+        self.resource = org_resource
 
     def _record_response(self, request):
         self.response = request(self._get_url())
