@@ -4,24 +4,10 @@ from cmd2 import argparse
 import requests
 from time import sleep
 
-CMD_REST_CLI = 'REST CLI Commands'
-
-response_parser = argparse.ArgumentParser(prog='response')
-response_subparser = response_parser.add_subparsers(title='subcommands', help='subcommand help')
-response_subcommands = {
-    'content': {'help': 'print body as bytes'},
-    'encoding': {'help': 'print encoding'},
-    'headers': {'help': 'print headers'},
-    'json': {'help': 'decode to JSON format'},
-    'status': {'help': 'print status code'},
-    'text': {'help': 'print text'},
-    'url': {'help': 'print URL'}
-}
-
-for k, v in response_subcommands.items():
-    v['func'] = response_subparser.add_parser(k, help=v['help'])
 
 class RestCmd(Cmd):
+    CMD_REST_CLI = 'REST CLI Commands'
+
     def __init__(self, url='http://localhost'):
         Cmd.__init__(self)
         self.url_root = url
@@ -118,6 +104,21 @@ class RestCmd(Cmd):
 
     def _get_url(self):
         return self.url_root + ('/{0}'.format(self.resource) if self.resource else '')
+
+    response_parser = argparse.ArgumentParser(prog='response')
+    response_subparser = response_parser.add_subparsers(title='subcommands', help='subcommand help')
+    response_subcommands = {
+        'content': {'help': 'print body as bytes'},
+        'encoding': {'help': 'print encoding'},
+        'headers': {'help': 'print headers'},
+        'json': {'help': 'decode to JSON format'},
+        'status': {'help': 'print status code'},
+        'text': {'help': 'print text'},
+        'url': {'help': 'print URL'}
+    }
+
+    for k, v in response_subcommands.items():
+        v['func'] = response_subparser.add_parser(k, help=v['help'])
 
     @with_argparser(response_parser)
     @with_category(CMD_REST_CLI)
