@@ -8,15 +8,15 @@ from time import sleep
 class RestCmd(Cmd):
     CMD_REST_CLI = 'REST CLI Commands'
 
-    def __init__(self, url='http://localhost'):
+    def __init__(self, url_root='http://localhost'):
         Cmd.__init__(self)
-        self.url_root = url
+        self.url_root = url_root
         self.resource = ''
         self._set_prompt()
         self.response = None
 
     def _set_prompt(self):
-        self.prompt = self.url_root + ' [/{0}] '.format(self.resource)
+        self.prompt = '\x1b[32m' + self.url_root + ' \x1b[34m[/{0}]\x1b[0m '.format(self.resource)
 
     @with_argument_list
     @with_category(CMD_REST_CLI)
