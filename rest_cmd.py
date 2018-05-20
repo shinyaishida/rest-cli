@@ -10,22 +10,33 @@ class RestCmd(Cmd):
 
     def __init__(self, url_root='http://localhost'):
         Cmd.__init__(self)
-        self.url_root = url_root
+        self.url_root = self._format_url_root(url_root)
         self.resource = ''
         self._set_prompt()
         self.response = None
+
+    def _format_url_root(self, url_root):
+        return url_root[:-1] if url_root.endswith('/') else url_root
 
     def _set_prompt(self):
         self.prompt = '\x1b[32m' + self.url_root + ' \x1b[34m[/{0}]\x1b[0m '.format(self.resource)
 
     @with_argument_list
     @with_category(CMD_REST_CLI)
+    def do_switch(self, args):
+        """Change URL root"""
+        if args:
+            self.url_root = self._format_url_root(args[0])
+            self._set_prompt()
+
+    @with_argument_list
+    @with_category(CMD_REST_CLI)
     def do_cd(self, args):
-        """Change URL hierarchy level"""
-        self.resource = self._change_resource(args[0]) if args else ''
+        """Change target resource"""
+        self.resource = self._switch_resource(args[0]) if args else ''
         self._set_prompt()
 
-    def _change_resource(self, resource):
+    def _switch_resource(self, resource):
         if not resource:
             return ''
         path = self.resource
@@ -92,7 +103,7 @@ class RestCmd(Cmd):
 
     def _iterate(self, request, args):
         if args.resource:
-            self.resource = self._change_resource(args.resource)
+            self.resource = self._switch_resource(args.resource)
             self._set_prompt()
         for i in range(args.count):
             self._record_response(request)
