@@ -1,6 +1,6 @@
 from cmd2 import Cmd
 from cmd2 import with_argument_list, with_category, with_argparser
-from cmd2 import argparse
+import argparse
 import requests
 from time import sleep
 
@@ -47,7 +47,7 @@ class RestCmd(Cmd):
                     tokens = path.split('/')
                     path = '/'.join(tokens[:-1])
                 else:
-                    print('Error: invalid resource {0}'.format(resource))
+                    self.perror('invalid resource {0}'.format(resource))
                     path = self.resource
                     break
             elif level != '.':
@@ -112,7 +112,7 @@ class RestCmd(Cmd):
 
     def _record_response(self, request):
         self.response = request(self._get_url())
-        print(self.response)
+        self.poutput(self.response)
 
     def _get_url(self):
         return self.url_root + ('/{0}'.format(self.resource) if self.resource else '')
@@ -141,37 +141,37 @@ class RestCmd(Cmd):
             if self.response is not None:
                 func(self, args)
             else:
-                print('Error: No requests sent')
+                self.perror('no requests sent')
         else:
             self.do_help('response')
 
     def _response_content(self, args):
         """Print body of last response as bytes"""
-        print(self.response.content)
+        self.poutput(self.response.content)
 
     def _response_encoding(self, args):
         """Print encoding of last response"""
-        print(self.response.encoding)
+        self.poutput(self.response.encoding)
 
     def _response_headers(self, args):
         """Print headers of last response"""
-        print(self.response.headers)
+        self.poutput(self.response.headers)
 
     def _response_json(self, args):
         """Decode body of last response into the JSON format"""
-        print(self.response.json())
+        self.poutput(self.response.json())
 
     def _response_status(self, args):
         """Print status code of last response"""
-        print(self.response.status_code)
+        self.poutput(self.response.status_code)
 
     def _response_text(self, args):
         """Print body of last response"""
-        print(self.response.text)
+        self.poutput(self.response.text)
 
     def _response_url(self, args):
         """Print URL of last request"""
-        print(self.response.url)
+        self.poutput(self.response.url)
 
     response_subcommands['content']['func'].set_defaults(func=_response_content)
     response_subcommands['encoding']['func'].set_defaults(func=_response_encoding)
