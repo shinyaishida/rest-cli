@@ -11,10 +11,12 @@ class BindableRestCmd(RestCmd):
         RestCmd.__init__(self, url_root)
 
     def _set_prompt(self):
-        self.prompt = '[{}{}/{}] '.format(
-            '{} '.format(self.bound_command) if self.bound_command else '',
-            self.colorize(self.url_root, 'green'),
-            self.colorize(self.resource, 'blue'))
+        pt_cmd = '{} '.format(self.bound_command) if self.bound_command else ''
+        pt_resrc = '/{}'.format(self.resource) if self.resource else ''
+        self.prompt = '[{}{}{}] '.format(
+            self.colorize(pt_cmd, 'green'),
+            self.colorize(self.url_root, 'blue'),
+            self.colorize(pt_resrc, 'green'))
 
     bind_parser = argparse.ArgumentParser(prog='bind')
     bind_subparser = bind_parser.add_subparsers(title='subcommands',
