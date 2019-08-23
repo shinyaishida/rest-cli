@@ -22,20 +22,34 @@ class BindableRestCmd(RestCmd):
     bind_subparser = bind_parser.add_subparsers(title='subcommands',
                                                 help='subommand help')
     bind_subcommands = {
-        'get': {'help': 'GET',
-                'func': lambda cmd, args: cmd._bind('get', cmd.do_get)},
-        'post': {'help': 'POST',
-                 'func': lambda cmd, args: cmd._bind('post', cmd.do_post)},
-        'put': {'help': 'PUT',
-                'func': lambda cmd, args: cmd._bind('put', cmd.do_put)},
-        'patch': {'help': 'PATCH',
-                  'func': lambda cmd, args: cmd._bind('patch', cmd.do_patch)},
-        'delete': {'help': 'DELETE',
-                   'func': lambda cmd, args: cmd._bind('delete', cmd.do_delete)},
-        'head': {'help': 'HEAD',
-                 'func': lambda cmd, args: cmd._bind('head', cmd.do_head)},
-        'options': {'help': 'OPTIONS',
-                    'func': lambda cmd, args: cmd._bind('options', cmd.do_options)}
+        'get': {
+            'help': 'GET',
+            'func': lambda cmd, args: cmd._bind('get', cmd.do_get)
+        },
+        'post': {
+            'help': 'POST',
+            'func': lambda cmd, args: cmd._bind('post', cmd.do_post)
+        },
+        'put': {
+            'help': 'PUT',
+            'func': lambda cmd, args: cmd._bind('put', cmd.do_put)
+        },
+        'patch': {
+            'help': 'PATCH',
+            'func': lambda cmd, args: cmd._bind('patch', cmd.do_patch)
+        },
+        'delete': {
+            'help': 'DELETE',
+            'func': lambda cmd, args: cmd._bind('delete', cmd.do_delete)
+        },
+        'head': {
+            'help': 'HEAD',
+            'func': lambda cmd, args: cmd._bind('head', cmd.do_head)
+        },
+        'options': {
+            'help': 'OPTIONS',
+            'func': lambda cmd, args: cmd._bind('options', cmd.do_options)
+        }
     }
 
     for subcmd, params in bind_subcommands.items():

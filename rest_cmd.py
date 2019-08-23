@@ -30,12 +30,24 @@ class RestCmd(Cmd):
             self.colorize(self.resource, 'blue'))
 
     OPTIONS = {
-        '-r': {'metavar': 'N', 'dest': 'count', 'type': int, 'default': 1,
-               'help': 'iteration count (1 by default)'},
-        '-i': {'dest': 'interval', 'type': float, 'default': 0.5,
-               'help': 'iteration interval in seconds (0.5 by default)'},
-        'resource': {'metavar': 'RESOURCE', 'nargs': '?',
-                     'help': 'resource to send request(s)'}
+        '-r': {
+            'metavar': 'N',
+            'dest': 'count',
+            'type': int,
+            'default': 1,
+            'help': 'iteration count (1 by default)'
+        },
+        '-i': {
+            'dest': 'interval',
+            'type': float,
+            'default': 0.5,
+            'help': 'iteration interval in seconds (0.5 by default)'
+        },
+        'resource': {
+            'metavar': 'RESOURCE',
+            'nargs': '?',
+            'help': 'resource to send request(s)'
+        }
     }
 
     repeatable_parser = argparse.ArgumentParser()
@@ -98,33 +110,49 @@ class RestCmd(Cmd):
         self.poutput(self.response)
 
     def _get_url(self):
-        return self.url_root + ('/{}'.format(self.resource) if self.resource else '')
+        path = '/{}'.format(self.resource) if self.resource else ''
+        return self.url_root + path
 
     response_parser = argparse.ArgumentParser(prog='response')
     response_subparser = response_parser.add_subparsers(title='subcommands',
                                                         help='subcommand help')
     response_subcommands = {
-        'content': {'help': 'print body as bytes',
-                    'func': lambda cmd, args: cmd.poutput(cmd.response.content)},
-        'encoding': {'help': 'print encoding',
-                     'func': lambda cmd, args: cmd.poutput(cmd.response.encoding)},
-        'headers': {'help': 'print headers',
-                    'func': lambda cmd, args: cmd.poutput(cmd.response.headers)},
-        'json': {'help': 'decode to JSON format',
-                 'func': lambda cmd, args: cmd.poutput(cmd.response.json())},
-        'status': {'help': 'print status code',
-                   'func': lambda cmd, args: cmd.poutput(cmd.response.status_code)},
-        'text': {'help': 'print text',
-                 'func': lambda cmd, args: cmd.poutput(cmd.response.text)},
-        'url': {'help': 'print URL',
-                'func': lambda cmd, args: cmd.poutput(cmd.response.url)}
+        'content': {
+            'help': 'print body as bytes',
+            'func': lambda cmd, args: cmd.poutput(cmd.response.content)
+        },
+        'encoding': {
+            'help': 'print encoding',
+            'func': lambda cmd, args: cmd.poutput(cmd.response.encoding)
+        },
+        'headers': {
+            'help': 'print headers',
+            'func': lambda cmd, args: cmd.poutput(cmd.response.headers)
+        },
+        'json': {
+            'help': 'decode to JSON format',
+            'func': lambda cmd, args: cmd.poutput(cmd.response.json())
+        },
+        'status': {
+            'help': 'print status code',
+            'func': lambda cmd, args: cmd.poutput(cmd.response.status_code)
+        },
+        'text': {
+            'help': 'print text',
+            'func': lambda cmd, args: cmd.poutput(cmd.response.text)
+        },
+        'url': {
+            'help': 'print URL',
+            'func': lambda cmd, args: cmd.poutput(cmd.response.url)
+        }
     }
 
     for subcmd, params in response_subcommands.items():
-        subcmd_parser = response_subparser.add_parser(subcmd,
-                                                      help=params['help'])
+        subcmd_parser = \
+            response_subparser.add_parser(subcmd, help=params['help'])
         subcmd_parser.set_defaults(func=params['func'])
-    response_parser.set_defaults(func=lambda cmd, args: cmd.do_help('response'))
+    response_parser.set_defaults(
+        func=lambda cmd, args: cmd.do_help('response'))
 
     @with_argparser(response_parser)
     @with_category(CMD_REST_ACTION)

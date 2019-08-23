@@ -7,8 +7,11 @@ if __name__ == '__main__':
     DESCRIPTION = 'REST CLI'
     PROGRAM = os.path.basename(sys.argv[0])
     OPTIONS = {
-        'url_root': {'metavar': 'URL', 'default': 'http://localhost',
-                     'help': 'URL to connect'}
+        'url_root': {
+            'metavar': 'URL',
+            'default': 'http://localhost',
+            'help': 'URL to connect'
+        }
     }
 
     parser = argparse.ArgumentParser(prog=PROGRAM, description=DESCRIPTION)
