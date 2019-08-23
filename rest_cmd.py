@@ -1,5 +1,6 @@
 from cmd2 import Cmd
 from cmd2 import with_argument_list, with_category, with_argparser
+from cmd2 import ansi
 import argparse
 import requests
 from time import sleep
@@ -16,6 +17,9 @@ class RestCmd(Cmd):
         self.resource = ''
         self._set_prompt()
         self.response = None
+
+    def colorize(self, string, fg='', bg='', bold=False, underline=False):
+        return ansi.style(string, fg=fg, bg=bg, bold=bold, underline=underline)
 
     def _format_url_root(self, url_root):
         self.url_root = url_root[:-1] if url_root.endswith('/') else url_root
